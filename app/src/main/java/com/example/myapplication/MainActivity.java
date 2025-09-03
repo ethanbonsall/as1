@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -97,28 +98,28 @@ private void savePhotoPath (String path) {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
-
+            n=0;
             savePhotoPath(currentPhotoPath);
             SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
             String photosJson = prefs.getString("photo_paths", "[]");
             try {
                 JSONArray jsonArray = new JSONArray(photosJson);
 
-                if (jsonArray.length() > n) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(jsonArray.getString(n));
+                if (jsonArray.length() > 0) {
+                    Bitmap bitmap = BitmapFactory.decodeFile(jsonArray.getString(0));
                     first_photo.setImageBitmap(bitmap);
                 }
 
-                if (jsonArray.length() > (n+1)) {
-                    Bitmap bitmap2 = BitmapFactory.decodeFile(jsonArray.getString((n+1)));
+                if (jsonArray.length() > 1) {
+                    Bitmap bitmap2 = BitmapFactory.decodeFile(jsonArray.getString(1));
                     second_photo.setImageBitmap(bitmap2);
                 }
-                if (jsonArray.length() > (n+2)) {
-                    Bitmap bitmap3 = BitmapFactory.decodeFile(jsonArray.getString((n+2)));
+                if (jsonArray.length() > 2) {
+                    Bitmap bitmap3 = BitmapFactory.decodeFile(jsonArray.getString(2));
                     third_photo.setImageBitmap(bitmap3);
                 }
-                if (jsonArray.length() > (n+3)) {
-                    Bitmap bitmap4 = BitmapFactory.decodeFile(jsonArray.getString((n+3)));
+                if (jsonArray.length() > 3) {
+                    Bitmap bitmap4 = BitmapFactory.decodeFile(jsonArray.getString(3));
                     fourth_photo.setImageBitmap(bitmap4);
                 }
             } catch (JSONException e) {
@@ -128,7 +129,7 @@ private void savePhotoPath (String path) {
         }
     }
 
-    protected void reorderandRefresh(){
+    protected void reorderAndRefresh(){
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         String photosJson = prefs.getString("photo_paths", "[]");
         try {
@@ -138,19 +139,36 @@ private void savePhotoPath (String path) {
                 Bitmap bitmap = BitmapFactory.decodeFile(jsonArray.getString(n));
                 first_photo.setImageBitmap(bitmap);
             }
+            else if (jsonArray.length() <= (n-1) ) {
+                n = 0;
+                reorderAndRefresh();
+            }
 
             if (jsonArray.length() > (n+1)) {
                 Bitmap bitmap2 = BitmapFactory.decodeFile(jsonArray.getString((n+1)));
                 second_photo.setImageBitmap(bitmap2);
             }
+            else{
+                second_photo.setImageResource(R.drawable.myimage);
+
+            }
             if (jsonArray.length() > (n+2)) {
                 Bitmap bitmap3 = BitmapFactory.decodeFile(jsonArray.getString((n+2)));
                 third_photo.setImageBitmap(bitmap3);
+            }
+            else{
+                third_photo.setImageResource(R.drawable.myimage);
+
             }
             if (jsonArray.length() > (n+3)) {
                 Bitmap bitmap4 = BitmapFactory.decodeFile(jsonArray.getString((n+3)));
                 fourth_photo.setImageBitmap(bitmap4);
             }
+            else{
+                fourth_photo.setImageResource(R.drawable.myimage);
+
+            }
+
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -165,6 +183,7 @@ protected void onCreate(Bundle savedInstanceState) {
     second_photo = findViewById(R.id.second_photo);
     third_photo = findViewById(R.id.third_photo);
     fourth_photo = findViewById(R.id.fourth_photo);
+
 
     SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
     String photosJson = prefs.getString("photo_paths", "[]");
@@ -219,21 +238,21 @@ protected void onCreate(Bundle savedInstanceState) {
         @Override
         public void onClick(View v) {
             n = n+1;
-            reorderandRefresh();
+            reorderAndRefresh();
         }
     });
     third_photo.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             n = n+2;
-            reorderandRefresh();
+            reorderAndRefresh();
         }
     });
     fourth_photo.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             n = n+3;
-            reorderandRefresh();
+            reorderAndRefresh();
         }
     });
     ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
